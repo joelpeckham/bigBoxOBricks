@@ -8,6 +8,7 @@
 # changes on any site, the changes must be synced appropriately. 
 # API keys for all three sites are stored in the api_keys.json file.
 
+from lib2to3.pgen2 import token
 import daemon           # We need this module so our script will always run as a daemon.
 import requests         # We need this module to make HTTPs requests to the various APIs.
 import shippo           # Shippo provies a wrapper module for the Shippo API, this should make this a little easier.
@@ -18,7 +19,7 @@ import os               # We need this module to check if the api_keys.json file
 import logging          # We need this module to log errors to a file.
 import datetime         # We need this module to get the current date and time, and do some date math.
 
-from requests_oauthlib import OAuth1Session # We need this module to make OAuth1 requests to the BrickLink API.
+from requests_oauthlib import OAuth1 # We need this module to make OAuth1 requests to the BrickLink API.
 
 # The first thing to do is to check if the api_keys.json file exists.
 # If it doesn't, we need to exit the program.
@@ -34,51 +35,42 @@ with open('api_keys.json', 'r') as f:
 # We'll make session objects for each API, then send a test call to each one.
 # If any of the calls fail, we'll exit the program.
 try:
-    # # The Shippo API has a testing option with a separate API key. Let's make a variable for it for debugging purposes.
-    # currently_testing = True    
-    # # We'll set the Shippo API key to the one we're currently using.
-    # shippo.config.api_key = api_keys['shippo_test'] if currently_testing else api_keys['shippo_live']
-    # # Then try to make a request with the Shippo API.
-    # shippoShipments = shippo.Shipment.all()
-    # # Just for testing, let's print the response to the console.
-    # print(shippoShipments)
+    # The Shippo API has a testing option with a separate API key. Let's make a variable for it for debugging purposes.
+    currently_testing = True    
+    # We'll set the Shippo API key to the one we're currently using.
+    shippo.config.api_key = api_keys['shippo_test'] if currently_testing else api_keys['shippo_live']
+    # Then try to make a request with the Shippo API.
+    shippoShipments = shippo.Shipment.all()
+    # Just for testing, let's print the response to the console.
+    print(shippoShipments)
 
-    # # Now let's test the brickowl API.
-    # # We'll start by creating a session object for the BrickOwl API.
-    # brickowl_session = requests.Session()
-    # brickowl_order_url = 'https://api.brickowl.com/v1/order/list'
-    # # We'll set the parameters for the request.
-    # brickowl_params = {
-    #     "key": api_keys['brick_owl']
-    # }
-    # # Then we'll make the request.
-    # brickowl_response = brickowl_session.get(brickowl_order_url, params=brickowl_params)
-    # # Just for testing, let's print the response to the console.
-    # print(json.dumps(json.loads(brickowl_response.text), indent=2))
+    # Now let's test the brickowl API.
+    # We'll start by creating a session object for the BrickOwl API.
+    brickowl_session = requests.Session()
+    brickowl_order_url = 'https://api.brickowl.com/v1/order/list'
+    # We'll set the parameters for the request.
+    brickowl_params = {
+        "key": api_keys['brick_owl']
+    }
+    # Then we'll make the request.
+    brickowl_response = brickowl_session.get(brickowl_order_url, params=brickowl_params)
+    # Just for testing, let's print the response to the console.
+    print(json.dumps(json.loads(brickowl_response.text), indent=2))
 
     # Now let's test the bricklink API. This one's a bit more complicated.
     # We'll start by creating a session object for the BrickLink API.
     bricklink_session = requests.Session()
     bricklink_order_url = 'https://api.bricklink.com/api/store/v1/orders'
     # Let's set the authorization header for the request. We're using Oauth 1 for this.
-    oauth1_signature = 
-    oauth_params = {
-        'oauth_signature_method': 'HMAC-SHA1',
-        'oauth_consumer_key': api_keys['bricklink_consumer_key'],
-        'oauth_timestamp': str(int(time.time())),
-        'oauth_nonce': str(int(time.time())),
-        'oauth_version': '1.0',
-        'oauth_signature': api_keys['bricklink_consumer_secret'],
-        'oauth_token': api_keys['bricklink_token_value']
-    }
-
+    oauth = OAuth1(api_keys['bricklink_consumer_key'], client_secret = api_keys['bricklink_consumer_secret'], token = api_keys['bricklink_token_value'], token_secret = api_keys['bricklink_token_secret'])
+    # We'll set the parameters for the request.
     bricklink_params = {
         "page": 1,
-        "page_size": 100,
-        "Authorization": json.dumps(oauth_params)
+        "page_size": 10
     }
     # Then we'll make the request.
-    bricklink_response = bricklink_session.get(bricklink_order_url, params = bricklink_params)
+    bricklink_response = bricklink_session.get(bricklink_order_url, params=bricklink_params, auth=oauth)
+
     # Just for testing, let's print the response to the console.
     print(json.dumps(json.loads(bricklink_response.text), indent=2))
     
