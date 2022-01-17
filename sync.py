@@ -8,18 +8,18 @@
 # changes on any site, the changes must be synced appropriately. 
 # API keys for all three sites are stored in the api_keys.json file.
 
-from lib2to3.pgen2 import token
-import daemon           # We need this module so our script will always run as a daemon.
-import requests         # We need this module to make HTTPs requests to the various APIs.
-import shippo           # Shippo provies a wrapper module for the Shippo API, this should make this a little easier.
-import json             # We need this module to read and write JSON files (such as api_keys.json).
-import time             # We need this module to sleep for a few seconds between API calls.
-import sys              # We need this module to exit the program when an error occurs.
-import os               # We need this module to check if the api_keys.json file exists.
-import logging          # We need this module to log errors to a file.
-import datetime         # We need this module to get the current date and time, and do some date math.
+import requests                         # We need this module to make HTTPs requests to the various APIs.
+import json                             # We need this module to read and write JSON files (such as api_keys.json).
+import time                             # We need this module to sleep for a few seconds between API calls.
+import sys                              # We need this module to exit the program when an error occurs.
+import os                               # We need this module to check if the api_keys.json file exists.
+import logging                          # We need this module to log errors to a file.
+from datetime import datetime           # We need this module to get the current date and time, and do some date math.
+from shippo_api import ShippoAPI        # We need this module to make Shippo API calls.
+from brickowl_api import BrickOwlAPI    # We need this module to make Brick Owl API calls.
+from bricklink_api import BrickLinkAPI  # We need this module to make Brick Link API calls.
 
-from requests_oauthlib import OAuth1Session # We need this module to make OAuth1 requests to the BrickLink API.
+
 
 # The first thing to do is to check if the api_keys.json file exists.
 # If it doesn't, we need to exit the program.
@@ -31,53 +31,64 @@ with open('api_keys.json', 'r') as f:
     api_keys = json.load(f)
 
 
-# Now that we have the API keys all sorted out, let's make sure they all work properly before we deamonize the script.
-# We'll make session objects for each API, then send a test call to each one.
-# If any of the calls fail, we'll exit the program.
-try:
-    # # The Shippo API has a testing option with a separate API key. Let's make a variable for it for debugging purposes.
-    # currently_testing = True    
-    # # We'll set the Shippo API key to the one we're currently using.
-    # shippo.config.api_key = api_keys['shippo_test'] if currently_testing else api_keys['shippo_live']
-    # # Then try to make a request with the Shippo API.
-    # shippoShipments = shippo.Shipment.all()
-    # # Just for testing, let's print the response to the console.
-    # print(shippoShipments)
+# Now that we have the API keys all sorted out, let's make objects for each API.
+shippoApi = ShippoAPI(api_keys['shippo_test']) 
+brickOwlApi = BrickOwlAPI(api_keys['brickowl'])
+# Bricklink uses OAuth1, so we need to give it a few more parameters.
+brickLinkApi = BrickLinkAPI(api_keys['bricklink_consumer_key'], api_keys['bricklink_consumer_secret'], api_keys['bricklink_token'], api_keys['bricklink_token_secret'])
 
-    # # Now let's test the brickowl API.
-    # # We'll start by creating a session object for the BrickOwl API.
-    # brickowl_session = requests.Session()
-    # brickowl_order_url = 'https://api.brickowl.com/v1/order/list'
-    # # We'll set the parameters for the request.
-    # brickowl_params = {
-    #     "key": api_keys['brick_owl']
-    # }
-    # # Then we'll make the request.
-    # brickowl_response = brickowl_session.get(brickowl_order_url, params=brickowl_params)
-    # # Just for testing, let's print the response to the console.
-    # print(json.dumps(json.loads(brickowl_response.text), indent=2))
+# Now that we have all the API objects, let's make a list of all the orders that need to be synced over to Shippo.
+# We'll start by making an empty list.
+new_orders = [] 
+# Then, we'll extend the list with all the new orders from Brick Owl.
+new_orders.extend(brickOwlApi.getNewOrders())
+# Then, we'll extend the list with all the new orders from Brick Link.
+new_orders.extend(brickLinkApi.getNewOrders())
+# Now let's push all the new orders to Shippo.
+shippoApi.createOrders(new_orders)
+# Now let's make sure that all the orders are in the correct state on every site.
+# We'll start by making a dictionary of all the orders with their order IDs as keys.
+order_dict = {}
+# We'll now download all the orders from Shippo.
+shippo_orders = shippoApi.getAllOrders()
+# And Brick Owl...
+brickOwl_orders = brickOwlApi.getAllOrders()
+# And Brick Link...
+brickLink_orders = brickLinkApi.getAllOrders()
 
-    # Now let's test the bricklink API. This one's a bit more complicated.
-    # We'll start by creating a session object for the BrickLink API.
-    bricklink_session = requests.Session()
-    bricklink_order_url = 'https://api.bricklink.com/api/store/v1/orders'
-    # Let's set the authorization header for the request. We're using Oauth 1 for this.
-    oauth = OAuth1Session(client_key= api_keys['bricklink_consumer_key'], client_secret= api_keys['bricklink_consumer_secret'], resource_owner_key= api_keys['bricklink_token_value'], resource_owner_secret= api_keys['bricklink_token_secret'])
+# We'll also need some dictionaries to keep track of the orders that need to be updated.
+# We'll start by making empty dictionaries.
+shippo_update_dict = {}
+brickOwl_update_dict = {}
+brickLink_update_dict = {}
 
-    # We'll set the parameters for the request.
-    bricklink_params = {
-        "status": "paid",
-    }
-    # Then we'll make the request.
-    bricklink_response = oauth.get(bricklink_order_url, params=bricklink_params)
+# Now let's loop through all the different order sources.
+for storeName, orderList in [('Shippo', shippo_orders), ('Brick Owl', brickOwl_orders), ('Brick Link', brickLink_orders)]:
+    # And loop through all the orders in each store.
 
-    # Just for testing, let's print the response to the console.
-    print(json.dumps(json.loads(bricklink_response.text), indent=2))
-    
-    # Alright? If we've made it this far, we're good to go.
+    for order in orderList:
+        # We'll add the order to the dictionary with its order ID as the key as long as it doesn't already exist.
+        if order['id'] not in order_dict:
+            order_dict[order['id']] = order
+        else:
+            # If the order already exists, we'll compare the updated_at values.
+            # If the updated_at value on the order in the store is newer than the one in the dictionary, we'll update the dictionary.
+            if datetime.strptime(order['updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ') > datetime.strptime(order_dict[order['id']]['updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ'):
+                order_dict[order['id']] = order
+                # And we'll add the order to the appropriate update dictionary.
+                if storeName == 'Shippo':
+                    shippo_update_dict[order['id']] = order
+                elif storeName == 'Brick Owl':
+                    brickOwl_update_dict[order['id']] = order
+                elif storeName == 'Brick Link':
+                    brickLink_update_dict[order['id']] = order
 
-except Exception as e:
-    print('Error in creating session objects. Exiting program.')
-    print(e)
-    sys.exit()
+# Alright, now let's update the orders on each site.
+# First, we'll update the Shippo orders.
+shippoApi.updateOrders(shippo_update_dict)
+# Then, we'll update the Brick Owl orders.
+brickOwlApi.updateOrders(brickOwl_update_dict)
+# And finally, we'll update the Brick Link orders.
+brickLinkApi.updateOrders(brickLink_update_dict)
 
+# That's it! ... for now.
