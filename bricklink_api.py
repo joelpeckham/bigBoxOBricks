@@ -14,3 +14,6 @@ class BrickLinkAPI:
     
     def _post(self, url, params=None) -> requests.Response:
         return self.session.post(url, params=params)
+
+    def getNewOrders(self):
+        pass
