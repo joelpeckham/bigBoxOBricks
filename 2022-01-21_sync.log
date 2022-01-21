@@ -1,0 +1,41 @@
+2022-01-21 21:22:20,863 Starting sync.py
+2022-01-21 21:22:22,206 Got 25 shippo order stubs.
+2022-01-21 21:22:22,207 Got 257 brickOwl order stubs.
+2022-01-21 21:22:22,207 Got 611 brickLink order stubs.
+2022-01-21 21:22:22,207 0 orders need to be added to Shippo.
+2022-01-21 21:22:22,207 Adding: []
+2022-01-21 21:22:22,207 Got details for 0 orders that need to be added to Shippo.
+2022-01-21 21:22:22,207 Added 0 orders to Shippo.
+2022-01-21 21:22:22,207 Added: []
+2022-01-21 21:22:22,207 21 orders are in the Shippo "SHIPPED" status.
+2022-01-21 21:28:41,123 Starting sync.py
+2022-01-21 21:28:42,182 Got 25 shippo order stubs.
+2022-01-21 21:28:42,182 Got 257 brickOwl order stubs.
+2022-01-21 21:28:42,182 Got 611 brickLink order stubs.
+2022-01-21 21:28:42,182 0 orders need to be added to Shippo.
+2022-01-21 21:28:42,182 Adding: []
+2022-01-21 21:28:42,182 Got details for 0 orders that need to be added to Shippo.
+2022-01-21 21:28:42,183 Added 0 orders to Shippo.
+2022-01-21 21:28:42,183 Added: []
+2022-01-21 21:28:42,183 21 orders are in the Shippo "SHIPPED" status.
+2022-01-21 21:30:34,204 Starting sync.py
+2022-01-21 21:30:35,343 Got 25 shippo order stubs.
+2022-01-21 21:30:35,344 Got 257 brickOwl order stubs.
+2022-01-21 21:30:35,344 Got 611 brickLink order stubs.
+2022-01-21 21:30:35,344 0 orders need to be added to Shippo.
+2022-01-21 21:30:35,344 Adding: []
+2022-01-21 21:30:35,344 Got details for 0 orders that need to be added to Shippo.
+2022-01-21 21:30:35,344 Added 0 orders to Shippo.
+2022-01-21 21:30:35,344 Added: []
+2022-01-21 21:30:35,344 21 orders are in the Shippo "SHIPPED" status.
+2022-01-21 21:31:38,823 Starting sync.py
+2022-01-21 21:31:40,004 Got 25 shippo order stubs.
+2022-01-21 21:31:40,004 Got 257 brickOwl order stubs.
+2022-01-21 21:31:40,005 Got 611 brickLink order stubs.
+2022-01-21 21:31:40,005 0 orders need to be added to Shippo.
+2022-01-21 21:31:40,005 Adding: []
+2022-01-21 21:31:40,005 Got details for 0 orders that need to be added to Shippo.
+2022-01-21 21:31:40,005 Added 0 orders to Shippo.
+2022-01-21 21:31:40,005 Added: []
+2022-01-21 21:31:40,005 19 orders are in the Shippo "SHIPPED" status.
+2022-01-21 21:31:40,005 Finished sync.py
