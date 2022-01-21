@@ -35,7 +35,7 @@ with open('api_keys.json', 'r') as f:
 
 
 # Now that we have the API keys all sorted out, let's make objects for each API.
-shippoApi = ShippoAPI(api_keys['shippo_test']) 
+shippoApi = ShippoAPI(api_keys['shippo_live']) 
 brickOwlApi = BrickOwlAPI(api_keys['brickowl'])
 # Bricklink uses OAuth1, so we need to give it a few more parameters.
 brickLinkApi = BrickLinkAPI(api_keys['bricklink_consumer_key'], api_keys['bricklink_consumer_secret'], api_keys['bricklink_token'], api_keys['bricklink_token_secret'])
@@ -49,6 +49,7 @@ brickLinkOrders = brickLinkApi.getAllOrders()
 # We'll also make sure that the order is not already in the shippo orders list.
 # Then, we'll add the order to the list of oders that need to be added to Shippo.
 ordersToAddToShippo = []
+print(shippoOrderStubs)
 for order in brickOwlOrders:
     if order.status in ['Payment Received', 'Processing', 'Processed']:
         if "brickowl_" + str(order.id) not in [o.id for o in shippoOrderStubs]:

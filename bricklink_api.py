@@ -30,6 +30,13 @@ class BrickLinkAPI:
             return Order('bricklink', res.json()['data'])
         else:
             return None
+    
+    def getOrderItems(self, order_id):
+        res = self._get(f'https://api.bricklink.com/api/store/v1/orders/{order_id}/items')
+        if res.status_code == 200:
+            return [{'title': i['item']['name'] + ' | ' + i['item']['no'], 'quantity': i['quantity'], 'sku':i['inventory_id']} for i in res.json()['data']]
+        else:
+            return []
 
 if __name__ == "__main__":
     with open('api_keys.json') as f:

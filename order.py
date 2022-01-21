@@ -3,8 +3,10 @@
 # Last Updated : Jan 17, 2022
 # This is a class that represents an order.
 
+from datetime import date, datetime as dt
+
 class Order:
-    def __init__(self, source, orderData):
+    def __init__(self, source, orderData, itemData = None):
         self.source = source
         builderFunctions = {
             'brickowl': self.buildBrickOwlOrder,
@@ -19,8 +21,12 @@ class Order:
         self.statusCode = self.data['status_code']
         self.created = self.data['created_at']
         self.statusChanged = self.data['status_changed']
+        self.weight = self.data['weight']
+        self.items = itemData
     
     def buildBrickOwlOrder(self, orderData):
+        # Create date string in YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format from the unix timestamp.
+        dateString = dt.fromtimestamp(int(orderData['order_time'])).strftime('%Y-%m-%d %H:%M:%S')
         return {
             'id': orderData['order_id'],
             'shippo_id': "brickowl_" + str(orderData['order_id']),
@@ -37,7 +43,8 @@ class Order:
             'status': orderData['status'],
             'status_code': int(orderData['status_id']),
             'status_changed': None,
-            'created_at': orderData['order_time']
+            'created_at': dateString,
+            'weight': orderData['weight']
         }
     def buildBrickLinkOrder(self, orderData):
         return {
@@ -56,7 +63,8 @@ class Order:
             'status': orderData['status'],
             'status_code': None,
             'status_changed': orderData['date_status_changed'],
-            'created_at': orderData['date_ordered']
+            'created_at': orderData['date_ordered'],
+            'weight': orderData['total_weight']
         }
     def buildShippoOrder(self, orderData):
         pass

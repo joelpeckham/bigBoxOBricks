@@ -33,9 +33,18 @@ class BrickOwlAPI:
         url = "https://api.brickowl.com/v1/order/view"
         response = self._get(url, params={'order_id': order_id})
         if response.status_code == 200:
-            return Order('brickowl', response.json())
+            return Order('brickowl', response.json(), self.getOrderItems(order_id))
         else:
             return None
+    
+    def getOrderItems(self, order_id):
+        url = "https://api.brickowl.com/v1/order/items"
+        response = self._get(url, params={'order_id': order_id})
+        if response.status_code == 200:
+            res = response.json()
+            return [{'title': i['name'], 'quantity': i['ordered_quantity'], 'sku':i['lot_id'],"weight": i["weight"],"weight_unit": "oz"} for i in res]
+        else:
+            return []
         
 if __name__ == '__main__':
     with open('api_keys.json') as f:

@@ -46,6 +46,10 @@ class ShippoAPI:
             "order_number": order.source + '_' + str(order.naitiveID),
             "order_status": "PAID",
             "placed_at": order.created,
+            "weight": order.weight,
+            "weight_unit": "oz",
+            "line_items": order.items
+
         }
         res = self._post("https://api.goshippo.com/v1/orders", body=orderData)
         if res.status_code == 201:
