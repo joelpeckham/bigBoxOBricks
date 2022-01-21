@@ -8,4 +8,5 @@ import shippo
 class ShippoAPI:
     def __init__(self, api_key) -> None:
         shippo.options.api_key = api_key
+    
         

@@ -1,0 +1,22 @@
+{
+    "requests": [
+        {
+            "endpoint": "catalog/search",
+            "request_method": "GET",
+            "params": [
+                {
+                    "query": "Vendor"
+                }
+            ]
+        },
+        {
+            "endpoint": "catalog/search",
+            "request_method": "GET",
+            "params": [
+                {
+                    "query": "Laser"
+                }
+            ]
+        }
+    ]
+}

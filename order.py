@@ -20,7 +20,7 @@ class Order:
         self.created = self.data['created_at']
         self.statusChanged = self.data['status_changed']
     
-    def buildBrickOwlOrder(orderData):
+    def buildBrickOwlOrder(self, orderData):
         return {
             'id': orderData['order_id'],
             'shippo_id': "brickowl_" + str(orderData['order_id']),
@@ -28,18 +28,18 @@ class Order:
                 'first_name': orderData['ship_first_name'],
                 'last_name': orderData['ship_last_name'],
                 'country_code': orderData['ship_country_code'],
-                'postal_code': orderData['ship_postal_code'],
+                'postal_code': orderData['ship_post_code'],
                 'street_1': orderData['ship_street_1'],
                 'street_2': orderData['ship_street_2'],
                 'city': orderData['ship_city'],
-                'state': orderData['ship_state'],
+                'state': orderData['ship_region'],
             },
             'status': orderData['status'],
             'status_code': int(orderData['status_id']),
             'status_changed': None,
             'created_at': orderData['order_time']
         }
-    def buildBrickLinkOrder(orderData):
+    def buildBrickLinkOrder(self, orderData):
         return {
             'id': orderData['order_id'],
             'shippo_id': "bricklink_" + str(orderData['order_id']),
@@ -58,5 +58,18 @@ class Order:
             'status_changed': orderData['date_status_changed'],
             'created_at': orderData['date_ordered']
         }
-    def buildShippoOrder(orderData):
+    def buildShippoOrder(self, orderData):
         pass
+    
+    def __repr__(self) -> str:
+        return f"Order({self.source}, {self.naitiveID}, {self.status}, {str(self.address)})"
+
+class OrderStub:
+    def __init__(self, source, order_id, status):
+        self.source = source
+        self.id = order_id
+        self.status = status
+    def __str__(self):
+        return "Order Stub: " + str(self.id) + " " + str(self.status)
+    def __repr__(self):
+        return "Order Stub: " + str(self.id) + " " + str(self.status)
