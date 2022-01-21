@@ -19,14 +19,14 @@ from bricklink_api import BrickLinkAPI  # We need this module to make Brick Link
 
 # First we'll configure the logger.
 currentDate = datetime.now().strftime('%Y-%m-%d')
-logging.basicConfig(filename=f'{currentDate}_sync.log', level=logging.INFO, format='%(asctime)s %(message)s',filemode='a')
+logging.basicConfig(filename=f'/home/joel/integration/{currentDate}_sync.log', level=logging.INFO, format='%(asctime)s %(message)s',filemode='a')
 
 try:
     logging.info("Starting sync.py")
 
     # The first thing to do is to check if the api_keys.json file exists.
     # If it doesn't, we need to exit the program.
-    if not os.path.isfile('api_keys.json'):
+    if not os.path.isfile('/home/joel/integration/api_keys.json'):
         logging.error('api_keys.json file not found. Exiting program.')
         sys.exit()
     # If the api_keys.json file exists, we need to read it.
@@ -112,3 +112,4 @@ try:
     # Assuming this works, we're done for now!
 except Exception as e:
     logging.error(e)
+    print(e)
