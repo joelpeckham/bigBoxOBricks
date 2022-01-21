@@ -49,7 +49,7 @@ brickLinkOrders = brickLinkApi.getAllOrders()
 # We'll also make sure that the order is not already in the shippo orders list.
 # Then, we'll add the order to the list of oders that need to be added to Shippo.
 ordersToAddToShippo = []
-print(shippoOrderStubs)
+# print(shippoOrderStubs)
 for order in brickOwlOrders:
     if order.status in ['Payment Received', 'Processing', 'Processed']:
         if "brickowl_" + str(order.id) not in [o.id for o in shippoOrderStubs]:
@@ -83,3 +83,18 @@ for order in ordersToAddToShippoWithDetails:
         ordersAddedToShippo.append(order)
 
 print(f'Added {len(ordersAddedToShippo)} orders to Shippo.')
+
+# Now let's make sure that the orders are in the correct status.
+# We'll start by getting all the orders from Shippo that have the status of "SHIPPED".
+shippedShippoOrderIds = [o.id for o in shippoOrderStubs if o.status == "SHIPPED"]
+
+print(f'{len(shippedShippoOrderIds)} orders are in the Shippo "SHIPPED" status.')
+
+for order_id in shippedShippoOrderIds:
+    source, order_id = order_id.split('_')
+    if source == 'brickowl':
+        [brickOwlApi.shipped(o.order_id) for o in brickOwlOrders if o.id == order_id]
+    elif source == 'bricklink':
+        [brickLinkApi.shipped(o.order_id) for o in brickLinkOrders if o.id == order_id]
+
+# Assuming this works, we're done for now!

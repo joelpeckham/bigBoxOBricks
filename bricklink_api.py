@@ -37,6 +37,13 @@ class BrickLinkAPI:
             return [{'title': i['item']['name'] + ' | ' + i['item']['no'], 'quantity': i['quantity'], 'sku':i['inventory_id']} for i in res.json()['data']]
         else:
             return []
+    
+    def shipped(self, order_id):
+        res = self._post(f'https://api.bricklink.com/api/store/v1/orders/{order_id}/status', data={'field': 'status', 'value': 'SHIPPED'})
+        if res.status_code == 200:
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     with open('api_keys.json') as f:

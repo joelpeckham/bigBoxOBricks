@@ -45,6 +45,14 @@ class BrickOwlAPI:
             return [{'title': i['name'], 'quantity': i['ordered_quantity'], 'sku':i['lot_id'],"weight": i["weight"],"weight_unit": "oz"} for i in res]
         else:
             return []
+    
+    def shipped(self, order_id):
+        url = "https://api.brickowl.com/v1/order/set_status"
+        response = self._post(url, params={'order_id': order_id, 'status_id': '5'})
+        if response.status_code == 200:
+            return True
+        else:
+            return False
         
 if __name__ == '__main__':
     with open('api_keys.json') as f:
