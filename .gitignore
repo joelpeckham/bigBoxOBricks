@@ -1,2 +1,4 @@
 api_keys.json
 *.log
+cronLog.txt
+job.sh
