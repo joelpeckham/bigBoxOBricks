@@ -38,12 +38,9 @@ class BrickOwlAPI:
             return None
         
 if __name__ == '__main__':
-    import argparse
-    des = """BrickOwl API Wrapper. Requires an API key. This is a module and should not be run directly, but since you\'re reading this, you\'re probably interested in testing the module. Provide an API key as an argument to this script, and we\'ll run the tests."""
-    parser = argparse.ArgumentParser(description=des)
-    parser.add_argument('--key', help='API Key for BrickOwl. See https://www.brickowl.com/api_docs.', required=True)
-    args = parser.parse_args()
-    api = BrickOwlAPI(args.key)
+    with open('api_keys.json') as f:
+        keys = json.load(f)
+    api = BrickOwlAPI(keys['brickowl'])
     orderList = api.getAllOrders()
     orderDeets = api.getOrderDetails(orderList[0].id)
     pprint(orderDeets)

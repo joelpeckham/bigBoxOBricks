@@ -18,6 +18,8 @@ from datetime import datetime           # We need this module to get the current
 from shippo_api import ShippoAPI        # We need this module to make Shippo API calls.
 from brickowl_api import BrickOwlAPI    # We need this module to make Brick Owl API calls.
 from bricklink_api import BrickLinkAPI  # We need this module to make Brick Link API calls.
+from order import Order                 # We need this module to store and manipulate order information.
+from order import OrderStub             # We need this module to store and manipulate order information.
 
 # First we'll configure the logger.
 logging.basicConfig(filename='sync.log', level=logging.INFO, format='%(asctime)s %(message)s')
@@ -38,34 +40,45 @@ brickOwlApi = BrickOwlAPI(api_keys['brickowl'])
 # Bricklink uses OAuth1, so we need to give it a few more parameters.
 brickLinkApi = BrickLinkAPI(api_keys['bricklink_consumer_key'], api_keys['bricklink_consumer_secret'], api_keys['bricklink_token'], api_keys['bricklink_token_secret'])
 
-# Now let's get all the orders from brickowl that have a status of 'paid'.
-paidOrders = brickOwlApi.getPaidOrders()
-# Let's extend the paidOrders list to include bricklink orders.
-paidOrders.extend(brickLinkApi.getPaidOrders())
+# Now we'll get all the order stubs from each source.
+shippoOrderStubs = shippoApi.getAllOrders()
+brickOwlOrders = brickOwlApi.getAllOrders()
+brickLinkOrders = brickLinkApi.getAllOrders()
 
-# Now we'll try to add each order to Shippo.
-for order in paidOrders:
-    try:
-        # We need to make a Shippo API call to create an order.
-        shippoApi.createOrder(order)
-    except Exception as e:
-        # If the error is anything other than a duplicate order, we need to log it.
-        if 'Duplicate order' not in str(e):
-            logging.error('Error creating Shippo order for order #' + str(order['order_id']) + ': ' + str(e))
+# We'll filter through the brick owl orders and get the ones that have a status of 'Payment Received', 'Processing', or 'Processed'.
+# We'll also make sure that the order is not already in the shippo orders list.
+# Then, we'll add the order to the list of oders that need to be added to Shippo.
+ordersToAddToShippo = []
+for order in brickOwlOrders:
+    if order.status in ['Payment Received', 'Processing', 'Processed']:
+        if "brickowl_" + str(order.id) not in [o.id for o in shippoOrderStubs]:
+            ordersToAddToShippo.append(order)
+# Now we'll do the same thing for the brick link orders. But for brick link, we'll only add orders that have a status of 'PAID' or 'PACKED'.
+for order in brickLinkOrders:
+    if order.status in ['PAID', 'PACKED']:
+        if "bricklink_" + str(order.id) not in [o.id for o in shippoOrderStubs]:
+            ordersToAddToShippo.append(order)
 
-# Now let's get all the orders from brickowl and bricklink that have a status of 'shipped'.
-# We'll store these orders in a dictionary so we can easily access them by order_id.
-shippedOrders = {o['order_id']: o for o in brickOwlApi.getShippedOrders()}
-shippedOrders.update({o['order_id']: o for o in brickLinkApi.getShippedOrders()})
+print(f'{len(ordersToAddToShippo)} orders need to be added to Shippo.')
 
-# Now we'll get all the Shippo orders that have a status of 'shipped'.
-shippoShippedOrders = shippoApi.getShippedOrders()
+# Now we need to get order details for each order that needs to be added to Shippo.
+# The details will include the address and other important information.
+ordersToAddToShippoWithDetails = []
+for order in ordersToAddToShippo:
+    if order.source == 'brickowl':
+        orderDetails = brickOwlApi.getOrderDetails(order.id)
+        ordersToAddToShippoWithDetails.append(orderDetails)
+    elif order.source == 'bricklink':
+        orderDetails = brickLinkApi.getOrderDetails(order.id)
+        ordersToAddToShippoWithDetails.append(orderDetails)
 
-# If there are any Shippo orders that are not in the shippedOrders list, we need to update the status of those orders in Brick Owl and Brick Link.
-for order in shippoShippedOrders:
-    if order['order_id'] not in shippedOrders:
-        if order.source == 'brickowl':
-            brickOwlApi.updateOrderStatus(order['order_id'], 'shipped')
-        elif order.source == 'bricklink':
-            brickLinkApi.updateOrderStatus(order['order_id'], 'shipped')
-            
+print(f'Got details for {len(ordersToAddToShippoWithDetails)} orders that need to be added to Shippo.')
+
+# Now we need to add the orders to Shippo.
+
+ordersAddedToShippo = []
+for order in ordersToAddToShippoWithDetails:
+    if shippoApi.addOrder(order): 
+        ordersAddedToShippo.append(order)
+
+print(f'Added {len(ordersAddedToShippo)} orders to Shippo.')
