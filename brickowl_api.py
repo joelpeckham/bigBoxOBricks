@@ -2,6 +2,7 @@
 # Written by Joel Peckham | joelskyler@gmail.com
 # Last Updated : Jan 17, 2022
 # This class is a wrapper for the Brick Owl API.
+from urllib.request import OpenerDirector
 import requests, json
 from order import Order, OrderStub
 from pprint import pprint
@@ -17,10 +18,6 @@ class BrickOwlAPI:
         params.update(self.keyParam)
         return self.session.get(url, params=params)
     
-    def _post(self, url, params={}, body = {}) -> requests.Response:
-        params.update(self.keyParam)
-        return self.session.post(url, params=params, data = json.dumps(body))
-
     def getAllOrders(self):
         url = "https://api.brickowl.com/v1/order/list"
         response = self._get(url, params={'limit': 1000000, 'list_type': 'store'})
@@ -48,10 +45,13 @@ class BrickOwlAPI:
     
     def shipped(self, order_id):
         url = "https://api.brickowl.com/v1/order/set_status"
-        response = self._post(url, params={'order_id': order_id, 'status_id': '5'})
+        bodyData = {'order_id': order_id, 'status_id': '5'}
+        bodyData.update(self.keyParam)
+        response = self.session.post(url, data=bodyData)
         if response.status_code == 200:
             return True
         else:
+            raise Exception(f"Failed to mark order {order_id} as shipped. Status: " + str(response.status_code) + str(response.text) + str(response.url))
             return False
         
 if __name__ == '__main__':
