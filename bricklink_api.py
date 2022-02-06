@@ -20,7 +20,7 @@ class BrickLinkAPI:
         res = self._get('https://api.bricklink.com/api/store/v1/orders')
         if res.status_code == 200:
             # print(json.dumps(res.json())[:100])
-            return [OrderStub('bricklink', o['order_id'], o['status']) for o in res.json()['data']]
+            return [OrderStub('bricklink', str(o['order_id']), o['status']) for o in res.json()['data']]
         else:
             print(res.status_code, res.text)
     

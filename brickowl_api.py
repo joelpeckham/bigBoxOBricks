@@ -22,7 +22,7 @@ class BrickOwlAPI:
         url = "https://api.brickowl.com/v1/order/list"
         response = self._get(url, params={'limit': 1000000, 'list_type': 'store'})
         if response.status_code == 200:
-            return [OrderStub('brickowl', o['order_id'], o['status']) for o in response.json()]
+            return [OrderStub('brickowl', str(o['order_id']), o['status']) for o in response.json()]
         else:
             return []
     

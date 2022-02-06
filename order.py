@@ -16,6 +16,7 @@ class Order:
         self.data = builderFunctions[source](orderData)
         self.address = self.data['address']
         self.naitiveID = self.data['id']
+        self.id = self.data['id']
         self.shippoID = self.data['shippo_id']
         self.status = self.data['status']
         self.statusCode = self.data['status_code']
