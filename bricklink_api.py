@@ -27,19 +27,25 @@ class BrickLinkAPI:
     def getOrderDetails(self, order_id):
         res = self._get(f'https://api.bricklink.com/api/store/v1/orders/{order_id}')
         if res.status_code == 200:
-            return Order('bricklink', res.json()['data'])
+            return Order('bricklink', res.json()['data'], self.getOrderItems(order_id))
         else:
             return None
     
     def getOrderItems(self, order_id):
-        res = self._get(f'https://api.bricklink.com/api/store/v1/orders/{order_id}/items')
+        res =  self._get(f'https://api.bricklink.com/api/store/v1/orders/{order_id}/items')
         if res.status_code == 200:
-            return [{'title': i['item']['name'] + ' | ' + i['item']['no'], 'quantity': i['quantity'], 'sku':i['inventory_id']} for i in res.json()['data']]
+            itemList = res.json()['data'][0]
+            gramsToOz = 0.035274
+            return [{'title': i['item']['name'], 'quantity': i['quantity'], 'sku':i['item']['no'],"weight": f'{(float(i["weight"]) * gramsToOz):.3f}' ,"weight_unit": "oz"} for i in itemList]
         else:
             return []
     
     def shipped(self, order_id):
-        res = self._post(f'https://api.bricklink.com/api/store/v1/orders/{order_id}/status', data={'field': 'status', 'value': 'SHIPPED'})
+        data = {
+            "field" : "status",
+            "value" : "SHIPPED" 
+        }
+        res = self.session.put(f'https://api.bricklink.com/api/store/v1/orders/{order_id}/status', json=data)
         if res.status_code == 200:
             return True
         else:

@@ -47,6 +47,7 @@ class Order:
             'weight': orderData['weight']
         }
     def buildBrickLinkOrder(self, orderData):
+        gramsToOz = 0.035274
         return {
             'id': orderData['order_id'],
             'shippo_id': "bricklink_" + str(orderData['order_id']),
@@ -64,13 +65,13 @@ class Order:
             'status_code': None,
             'status_changed': orderData['date_status_changed'],
             'created_at': orderData['date_ordered'],
-            'weight': orderData['total_weight']
+            'weight': str(float(orderData['total_weight']) * gramsToOz)
         }
     def buildShippoOrder(self, orderData):
         pass
     
     def __repr__(self) -> str:
-        return f"Order({self.source}, {self.naitiveID}, {self.status}, {str(self.address)})"
+        return f"Order({self.source}, {self.naitiveID}, {self.status}, {str(self.address)}, Weight: {self.weight})"
 
 class OrderStub:
     def __init__(self, source, order_id, status):

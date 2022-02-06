@@ -5,6 +5,7 @@
 
 import requests, json
 from order import Order, OrderStub
+import logging
 
 class ShippoAPI:
     def __init__(self, api_key) -> None:
@@ -52,10 +53,11 @@ class ShippoAPI:
 
         }
         res = self._post("https://api.goshippo.com/v1/orders", body=orderData)
+        logging.info(orderData)
         if res.status_code == 201:
             return True
         else:
-            print(res.status_code, res.text)
+            logging.info(res.status_code, res.text)
             return False
         
 
