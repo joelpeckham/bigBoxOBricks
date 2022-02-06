@@ -92,25 +92,25 @@ try:
 
     # Now let's make sure that the orders are in the correct status.
     # We'll start by getting all the orders from Shippo that have the status of "SHIPPED".
-    shippedShippoOrderIds = [o.id for o in shippoOrderStubs if o.id and o.status == "SHIPPED"]
+    shippedShippoOrderStubs = [o for o in shippoOrderStubs if o.id and o.status == "SHIPPED"]
 
-    logging.info(f'{len(shippedShippoOrderIds)} orders are in the Shippo "SHIPPED" status.')
+    logging.info(f'{len(shippedShippoOrderStubs)} orders are in the Shippo "SHIPPED" status.')
 
-    for order_id in shippedShippoOrderIds:
-        if len(order_id.split('_')) == 2:
-            source, order_id = order_id.split('_')
-            if source == 'brickowl':
-                if order_id in [o.id for o in brickOwlOrders if o.status in ['Payment Received', 'Processing', 'Processed']]:
-                    if brickOwlApi.shipped(order_id):
-                        logging.info(f'Marked brickOwl order {order_id} as shipped.')
-                    else:
-                        logging.error(f'Failed to mark brickOwl order {order_id} as shipped.')
-            elif source == 'bricklink':
-                if order_id in [o.id for o in brickLinkOrders if o.status in ['PAID', 'PACKED']]:
-                    if brickLinkApi.shipped(order_id):
-                        logging.info(f'Marked brickLink order {order_id} as shipped.')
-                    else:
-                        logging.error(f'Failed to mark brickLink order {order_id} as shipped.')
+    for order in shippedShippoOrderStubs:
+        order_id = order.id
+        source = order.source
+        if source == 'brickowl':
+            if order_id in [o.id for o in brickOwlOrders if o.status in ['Payment Received', 'Processing', 'Processed']]:
+                if brickOwlApi.shipped(order_id):
+                    logging.info(f'Marked brickOwl order {order_id} as shipped.')
+                else:
+                    logging.error(f'Failed to mark brickOwl order {order_id} as shipped.')
+        elif source == 'bricklink':
+            if order_id in [o.id for o in brickLinkOrders if o.status in ['PAID', 'PACKED']]:
+                if brickLinkApi.shipped(order_id):
+                    logging.info(f'Marked brickLink order {order_id} as shipped.')
+                else:
+                    logging.error(f'Failed to mark brickLink order {order_id} as shipped.')
 
     logging.info("Finished sync.py")
     # Assuming this works, we're done for now!
