@@ -28,8 +28,8 @@ class Order:
         # Create date string in YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format from the unix timestamp.
         dateString = dt.fromtimestamp(int(orderData['order_time'])).strftime('%Y-%m-%d %H:%M:%S')
         return {
-            'id': orderData['order_id'],
-            'shippo_id': "brickowl_" + str(orderData['order_id']),
+            'id': str(orderData['order_id']),
+            'shippo_id': str(orderData['order_id']),
             'address': {
                 'first_name': orderData['ship_first_name'],
                 'last_name': orderData['ship_last_name'],
@@ -49,8 +49,8 @@ class Order:
     def buildBrickLinkOrder(self, orderData):
         gramsToOz = 0.035274
         return {
-            'id': orderData['order_id'],
-            'shippo_id': "bricklink_" + str(orderData['order_id']),
+            'id': str(orderData['order_id']),
+            'shippo_id': str(orderData['order_id']),
             'address': {
                 'first_name': orderData['shipping']['address']['name']['first'],
                 'last_name': orderData['shipping']['address']['name']['last'],

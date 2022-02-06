@@ -20,13 +20,23 @@ class ShippoAPI:
     def _post(self, url, params=None, body=None) -> requests.Response:
         return self.session.post(url, params=params, json=body)
     
+    def parseSource(self, orderId):
+        if len(orderId) == 5:
+            return 'ebay'
+        elif len(orderId) == 6:
+            return 'brickowl'
+        elif len(orderId) == 8:
+            return 'bricklink'
+        else:
+            return 'unknown'
+
     def getAllOrders(self):
         url = "https://api.goshippo.com/v1/orders"
         orderList = []
         while url:
             res = self._get(url)
             if res.status_code == 200:
-                orderList.extend([OrderStub('shippo', o['order_number'], o['order_status']) for o in res.json()['results']])
+                orderList.extend([OrderStub(self.parseSource(o['order_number']), o['order_number'], o['order_status']) for o in res.json()['results']])
                 url = res.json()['next']
             else:
                 print(res.status_code, res.text)
@@ -44,7 +54,7 @@ class ShippoAPI:
                 "street2": order.address['street_2'],
                 "zip": order.address['postal_code']
             },
-            "order_number": order.source + '_' + str(order.naitiveID),
+            "order_number": str(order.naitiveID),
             "order_status": "PAID",
             "placed_at": order.created,
             "weight": order.weight,

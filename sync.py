@@ -56,12 +56,12 @@ try:
 
     for order in brickOwlOrders:
         if order.status in ['Processed']:
-            if "brickowl_" + str(order.id) not in [o.id for o in shippoOrderStubs]:
+            if order.id not in [o.id for o in shippoOrderStubs]:
                 ordersToAddToShippo.append(order)
     # Now we'll do the same thing for the brick link orders. But for brick link, we'll only add orders that have a status of 'PAID' or 'PACKED'.
     for order in brickLinkOrders:
         if order.status in ['PACKED']:
-            if "bricklink_" + str(order.id) not in [o.id for o in shippoOrderStubs]:
+            if order.id not in [o.id for o in shippoOrderStubs]:
                 ordersToAddToShippo.append(order)
 
     logging.info(f'{len(ordersToAddToShippo)} orders need to be added to Shippo.')
