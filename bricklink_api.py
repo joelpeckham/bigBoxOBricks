@@ -50,7 +50,19 @@ class BrickLinkAPI:
             return True
         else:
             return False
-
+    
+    def trackPackage(self, order_id, tracking_number):
+        data = {
+            "shipping":{
+                "tracking_no": tracking_number
+            }
+        }
+        res = self.session.put(f'https://api.bricklink.com/api/store/v1/orders/{order_id}', json=data)
+        # print (res.status_code, res.text)
+        if res.status_code == 200:
+            return True
+        else:
+            return False
 if __name__ == "__main__":
     with open('api_keys.json') as f:
         keys = json.load(f)

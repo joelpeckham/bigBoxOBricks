@@ -23,7 +23,7 @@ class ShippoAPI:
     def parseSource(self, orderId):
         if len(orderId) == 5:
             return 'ebay'
-        elif len(orderId) == 6:
+        elif len(orderId) == 7:
             return 'brickowl'
         elif len(orderId) == 8:
             return 'bricklink'
@@ -31,17 +31,22 @@ class ShippoAPI:
             return 'unknown'
 
     def getAllOrders(self):
-        url = "https://api.goshippo.com/v1/orders"
+        url = "https://api.goshippo.com/v1/orders/"
         orderList = []
         while url:
-            res = self._get(url)
+            res = self.session.get(url)
             if res.status_code == 200:
-                orderList.extend([OrderStub(self.parseSource(o['order_number']), o['order_number'], o['order_status']) for o in res.json()['results']])
-                url = res.json()['next']
+                data = res.json()
+                orderList.extend([OrderStub(self.parseSource(o['order_number']), o['order_number'], o['order_status'], o['object_id']) for o in data['results']])
+                url = data['next']
             else:
                 print(res.status_code, res.text)
                 break
         return orderList
+    
+    def getOrder(self, objectId):
+        url = f"https://api.goshippo.com/v1/orders/{objectId}"
+        return self._get(url).json()
 
     def addOrder(self,order:Order):
         orderData = {

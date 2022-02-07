@@ -75,10 +75,11 @@ class Order:
         return f"Order({self.source}, {self.naitiveID}, {self.status}, {str(self.address)}, Weight: {self.weight})"
 
 class OrderStub:
-    def __init__(self, source, order_id, status):
+    def __init__(self, source, order_id, status, shippoObjectId = None):
         self.source = source
         self.id = order_id
         self.status = status
+        self.shippoObjectId = shippoObjectId
     def __str__(self):
         return "Order Stub: " + str(self.id) + " " + str(self.status)
     def __repr__(self):

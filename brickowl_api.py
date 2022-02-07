@@ -53,6 +53,17 @@ class BrickOwlAPI:
         else:
             raise Exception(f"Failed to mark order {order_id} as shipped. Status: " + str(response.status_code) + str(response.text) + str(response.url))
             return False
+    def trackPackage(self, order_id, tracking_number):
+        # POST https://api.brickowl.com/v1/order/tracking
+        url = "https://api.brickowl.com/v1/order/tracking"
+        bodyData = {'order_id': order_id, 'tracking_id': tracking_number}
+        bodyData.update(self.keyParam)
+        response = self.session.post(url, data=bodyData)
+        if response.status_code == 200:
+            return True
+        else:
+            raise Exception(f"Failed to mark order {order_id} as shipped. Status: " + str(response.status_code) + str(response.text) + str(response.url))
+            return False
         
 if __name__ == '__main__':
     with open('api_keys.json') as f:
