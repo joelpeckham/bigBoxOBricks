@@ -21,6 +21,7 @@ class ShippoAPI:
         return self.session.post(url, params=params, json=body)
     
     def parseSource(self, orderId):
+        print(orderId)
         if len(orderId) == 5:
             return 'ebay'
         elif len(orderId) == 7:
@@ -37,7 +38,8 @@ class ShippoAPI:
             res = self.session.get(url)
             if res.status_code == 200:
                 data = res.json()
-                orderList.extend([OrderStub(self.parseSource(o['order_number']), o['order_number'], o['order_status'], o['object_id']) for o in data['results']])
+                print(data)
+                orderList.extend([OrderStub(self.parseSource(o['order_number']), o['order_number'], o['order_status'], o['object_id']) for o in data['results'] if o.get('order_number')])
                 url = data['next']
             else:
                 print(res.status_code, res.text)
@@ -83,4 +85,3 @@ if __name__ == "__main__":
     orderList = api.getAllOrders()
     print(orderList)
     print(len(orderList))
-
