@@ -12,7 +12,7 @@ import json                             # We need this module to read and write 
 import sys                              # We need this module to exit the program when an error occurs.
 import os                               # We need this module to check if the api_keys.json file exists.
 import logging                          # We need this module to log errors to a file.
-from datetime import datetime           # We need this module to get the current date and time, and do some date math.
+from datetime import datetime, timedelta           # We need this module to get the current date and time, and do some date math.
 from shippo_api import ShippoAPI        # We need this module to make Shippo API calls.
 from brickowl_api import BrickOwlAPI    # We need this module to make Brick Owl API calls.
 from bricklink_api import BrickLinkAPI  # We need this module to make Brick Link API calls.
@@ -96,7 +96,7 @@ try:
 
 
     logging.info(f'{len(shippedShippoOrderStubs)} orders are in the Shippo "SHIPPED" status.')
-    logging.info(json.dumps(shippedShippoOrderStubs, indent=4))
+    logging.info(f'Checking: {shippedShippoOrderStubs}')
 
     for order in shippedShippoOrderStubs:
         order_id = order.id
@@ -122,5 +122,14 @@ try:
 
     logging.info("Finished sync.py")
     # Assuming this works, we're done for now!
+    
+    # If log files are older than 14 days, delete them
+    twoWeeksAgo = datetime.now() - timedelta(days=14)
+    lodDir = "/home/joel/integration/"
+    for file in os.listdir(lodDir):
+        if file.endswith(".log") and os.path.getmtime(lodDir + file) < twoWeeksAgo.timestamp():
+            os.remove(lodDir + file)
+            logging.info(f"Deleted {file}")
+
 except Exception as e:
     logging.error(f'Error: {e}')
