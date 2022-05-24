@@ -131,5 +131,11 @@ try:
             os.remove(lodDir + file)
             logging.info(f"Deleted {file}")
 
+    # If cronLog.txt is larger than 1GB, delete it
+    cronLog = "/home/joel/integration/cronLog.txt"
+    if os.path.getsize(cronLog) > 1000000000:
+        os.remove(cronLog)
+        logging.info(f"Deleted cronLog.txt")
+
 except Exception as e:
     logging.error(f'Error: {e}')
