@@ -1,6 +1,6 @@
 # sync.py
 # Written by Joel Peckham | joelskyler@gmail.com
-# Last Updated : Jan 17, 2022
+# Last Updated : Jan 24, 2022
 # This program was designed to run as a daemon on an Ubuntu VPS.
 # The purpose of this program is to sync order information between
 # Shippo, BrickLink, and Brick Owl. As orders are created on either
